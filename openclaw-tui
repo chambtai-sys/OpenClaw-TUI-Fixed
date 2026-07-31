@@ -74,7 +74,7 @@ def show_logo():
                        ────█░░█░░░░█░░█────
                        ─▄▄▄█░░░░▀▀░░░░█▄▄▄─
                        ─█░░░▀▄░░░░░░▄▀░░░█─
-                               {B_YELLOW}{BOLD}TLI Tool v1.0.0{RESET}
+                               {B_YELLOW}{BOLD}TUI Tool v1.0.0{RESET}
 """
     print(logo)
 
@@ -628,11 +628,11 @@ def display_unified_status(interactive=True):
 def print_help():
     show_logo()
     print(f"""{BOLD}Usage:{RESET}
-  openclaw-tli [command] [options]
+  openclaw-tui [command] [options]
 
 {BOLD}Interactive Mode:{RESET}
-  Simply run the tool without arguments to access the interactive Text/Terminal Line Interface:
-  {CYAN}openclaw-tli{RESET}
+  Simply run the tool without arguments to access the interactive Terminal User Interface:
+  {CYAN}openclaw-tui{RESET}
 
 {BOLD}Non-Interactive Commands:{RESET}
   {GREEN}status{RESET}                 Show diagnostic status of both OpenClaw AI and Captain Claw.
@@ -642,9 +642,9 @@ def print_help():
   {GREEN}help, -h, --help{RESET}       Show this detailed documentation.
 
 {BOLD}Examples:{RESET}
-  openclaw-tli status
-  openclaw-tli install ai
-  openclaw-tli run game
+  openclaw-tui status
+  openclaw-tui install ai
+  openclaw-tui run game
 """)
 
 def run_cli_mode():
@@ -665,7 +665,7 @@ def run_cli_mode():
         elif target == "game":
             install_openclaw_game()
         else:
-            print_error("Please specify target: 'openclaw-tli install ai' or 'openclaw-tli install game'")
+            print_error("Please specify target: 'openclaw-tui install ai' or 'openclaw-tui install game'")
             sys.exit(1)
 
     elif cmd == "configure":
@@ -675,7 +675,7 @@ def run_cli_mode():
         elif target == "game":
             configure_openclaw_game()
         else:
-            print_error("Please specify target: 'openclaw-tli configure ai' or 'openclaw-tli configure game'")
+            print_error("Please specify target: 'openclaw-tui configure ai' or 'openclaw-tui configure game'")
             sys.exit(1)
 
     elif cmd == "run":
@@ -685,11 +685,11 @@ def run_cli_mode():
         elif target == "game":
             run_openclaw_game()
         else:
-            print_error("Please specify target: 'openclaw-tli run ai' or 'openclaw-tli run game'")
+            print_error("Please specify target: 'openclaw-tui run ai' or 'openclaw-tui run game'")
             sys.exit(1)
 
     else:
-        print_error(f"Unknown command '{cmd}'. Use 'openclaw-tli --help' for options.")
+        print_error(f"Unknown command '{cmd}'. Use 'openclaw-tui --help' for options.")
         sys.exit(1)
 
 
@@ -702,7 +702,7 @@ def run_interactive_mode():
         clear_screen()
         show_logo()
 
-        print(f"Welcome to the ultimate {BOLD}OpenClaw TLI Suite{RESET}! Choose a service to configure/run:\n")
+        print(f"Welcome to the ultimate {BOLD}OpenClaw TUI Suite{RESET}! Choose a service to configure/run:\n")
         print(f"  {BOLD}1) 🤖 OpenClaw AI Assistant{RESET}  (Personal Autonomous Developer Agent)")
         print(f"  {BOLD}2) 🏴‍☠️ OpenClaw Game Engine{RESET}  (Captain Claw 1997 HD Reimplementation)")
         print(f"  {BOLD}3) 📋 Unified Diagnostics{RESET}  (Combined System Check)")
@@ -789,13 +789,13 @@ In 2026, the name "OpenClaw" gained massive fame in two completely different rea
    2D side-scrolling platformer, "Captain Claw" (with its legendary pirate cat Nathaniel J. Claw).
    It allows retro gamers to run the game flawlessly on modern HD operating systems.
 
-{CYAN}This TLI (Terminal Line Interface) tool bridges the gap, allowing you to run, configure,
+{CYAN}This TUI (Terminal User Interface) tool bridges the gap, allowing you to run, configure,
 and install BOTH magnificent pieces of technology from a single console wrapper!{RESET}
 """)
             get_input("Press ENTER to return to main menu")
 
         elif choice == "5" or choice is None:
-            print_success("Thanks for using OpenClaw TLI! Goodbye.")
+            print_success("Thanks for using OpenClaw TUI! Goodbye.")
             sys.exit(0)
 
 
