@@ -1,4 +1,4 @@
-# OpenClaw-TLI
+# OpenClaw-TUI
 
 ```text
  ██████╗ ██████╗ ███████╗███╗   ██╗ ██████╗██╗      █████╗ ██╗█╗  ██╗
@@ -12,10 +12,10 @@
                        ────█░░█░░░░█░░█────
                        ─▄▄▄█░░░░▀▀░░░░█▄▄▄─
                        ─█░░░▀▄░░░░░░▄▀░░░█─
-                               TLI Tool v1.0.0
+                               TUI Tool v1.0.0
 ```
 
-An advanced, interactive **TLI (Text-based Line Interface)** and unified **CLI (Command Line Interface)** for running, configuring, installing, and diagnosing the **OpenClaw** ecosystem.
+An advanced, interactive **TUI (Terminal User Interface)** and unified **CLI (Command Line Interface)** for running, configuring, installing, and diagnosing the **OpenClaw** ecosystem.
 
 ---
 
@@ -28,7 +28,7 @@ In the software development and retro-gaming worlds, **OpenClaw** has two vastly
 2. **🏴‍☠️ The Game Engine (`pjasicek/OpenClaw`)**:
    A modern open-source C++ and SDL2 recreation of Monolith's beloved 1997 2D side-scrolling platformer, **"Captain Claw"** (featuring the legendary pirate cat Nathaniel J. Claw). It allows gamers to play the game natively on modern operating systems at high resolutions.
 
-**OpenClaw-TLI is the ultimate bridge that allows you to manage, install, configure, and execute BOTH incredible systems from a single, unified console workspace!**
+**OpenClaw-TUI is the ultimate bridge that allows you to manage, install, configure, and execute BOTH incredible systems from a single, unified console workspace!**
 
 ---
 
@@ -36,7 +36,7 @@ In the software development and retro-gaming worlds, **OpenClaw** has two vastly
 
 - 🎨 **Gorgeous ANSI UI Branding**: Highlights terminal output with distinct colors for successes, alerts, inputs, and system information.
 - 🚀 **Two Ways to Run**:
-  - **Interactive TLI Mode**: A guided terminal selection menu perfect for humans.
+  - **Interactive TUI Mode**: A guided terminal selection menu perfect for humans.
   - **Automated CLI Mode**: Straightforward command line arguments perfect for scripts, aliases, and automation.
 - 🤖 **AI Assistant Integration**:
   - Install standard, globally packed, or localized source-built OpenClaw gateway servers.
@@ -55,7 +55,7 @@ In the software development and retro-gaming worlds, **OpenClaw** has two vastly
 
 ## 📦 Prerequisites
 
-OpenClaw-TLI is entirely self-contained inside Python's robust standard library. It has **zero external python dependencies**, ensuring it runs instantly on any server, container, or computer without installing packages.
+OpenClaw-TUI is entirely self-contained inside Python's robust standard library. It has **zero external python dependencies**, ensuring it runs instantly on any server, container, or computer without installing packages.
 
 - **Python**: 3.8 or newer (3.12+ recommended)
 - **Git**: Required for cloning source repositories
@@ -69,15 +69,15 @@ OpenClaw-TLI is entirely self-contained inside Python's robust standard library.
 Clone this repository and mark the main script as executable:
 
 ```bash
-chmod +x openclaw-tli
+chmod +x openclaw-tui
 ```
 
-### 2. Launch Interactive TLI
+### 2. Launch Interactive TUI
 
 Simply run the tool without any command-line arguments to access the interactive menus:
 
 ```bash
-./openclaw-tli
+./openclaw-tui
 ```
 
 ### 3. Non-Interactive CLI Commands
@@ -86,22 +86,22 @@ Use single-line CLI commands for speed and scripting automation:
 
 ```bash
 # View help & documentation
-./openclaw-tli --help
+./openclaw-tui --help
 
 # Check unified system diagnostic report
-./openclaw-tli status
+./openclaw-tui status
 
 # Install target component (ai / game)
-./openclaw-tli install ai
-./openclaw-tli install game
+./openclaw-tui install ai
+./openclaw-tui install game
 
 # Modify settings for specified component
-./openclaw-tli configure ai
-./openclaw-tli configure game
+./openclaw-tui configure ai
+./openclaw-tui configure game
 
 # Start/Run specified component
-./openclaw-tli run ai
-./openclaw-tli run game
+./openclaw-tui run ai
+./openclaw-tui run game
 ```
 
 ---
@@ -110,10 +110,10 @@ Use single-line CLI commands for speed and scripting automation:
 
 ### Interactive Main Menu
 
-Upon running `./openclaw-tli`, you are greeted by our signature Captain Claw ASCII logo and a main directory choice:
+Upon running `./openclaw-tui`, you are greeted by our signature Captain Claw ASCII logo and a main directory choice:
 
 ```text
-Welcome to the ultimate OpenClaw TLI Suite! Choose a service to configure/run:
+Welcome to the ultimate OpenClaw TUI Suite! Choose a service to configure/run:
 
   1) 🤖 OpenClaw AI Assistant  (Personal Autonomous Developer Agent)
   2) 🏴‍☠️ OpenClaw Game Engine  (Captain Claw 1997 HD Reimplementation)
@@ -143,12 +143,12 @@ Select parameters to change:
 
 ## 🧪 Developer & Quality Assurance
 
-To guarantee code reliability and prevent regression, OpenClaw-TLI comes with a comprehensive suite of unit and integration smoke tests.
+To guarantee code reliability and prevent regression, OpenClaw-TUI comes with a comprehensive suite of unit and integration smoke tests.
 
 Run the test suite using Python's standard unittest library:
 
 ```bash
-python3 test_openclaw_tli.py
+python3 test_openclaw_tui.py
 ```
 
 ### Verified Test Cases:
