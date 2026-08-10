@@ -1,4 +1,4 @@
-# OpenClaw-TUI-Fixed
+# OpenClaw-TUI
 
 ```text
  ██████╗ ██████╗ ███████╗███╗   ██╗ ██████╗██╗      █████╗ ██╗█╗  ██╗
@@ -15,20 +15,15 @@
                                TUI Tool v1.0.0
 ```
 
-An advanced, interactive and fixed **TUI (Terminal User Interface)** and unified **CLI (Command Line Interface)** for running, configuring, installing, and diagnosing the **OpenClaw** ecosystem.
+An advanced, interactive **TUI (Terminal User Interface)** and unified **CLI (Command Line Interface)** for running, configuring, installing, and diagnosing the **OpenClaw AI Assistant** ecosystem.
 
 ---
 
-## 🌟 The Naming Collision Mystery Solved!
+## 🤖 What is OpenClaw AI Assistant?
 
-In the software development and retro-gaming worlds, **OpenClaw** has two vastly different but equally famous identities:
+An extremely popular, fully autonomous, local-first personal developer AI agent. It operates on your local machine, interacting through your favorite chat apps, executing terminals, running code, and self-learning skills.
 
-1. **🤖 The AI Assistant (`openclaw/openclaw`)**:
-   An extremely popular, fully autonomous, local-first personal developer AI agent. It operates on your local machine, interacting through your favorite chat apps, executing terminals, running code, and self-learning skills.
-2. **🏴‍☠️ The Game Engine (`pjasicek/OpenClaw`)**:
-   A modern open-source C++ and SDL2 recreation of Monolith's beloved 1997 2D side-scrolling platformer, **"Captain Claw"** (featuring the legendary pirate cat Nathaniel J. Claw). It allows gamers to play the game natively on modern operating systems at high resolutions.
-
-**OpenClaw-TUI is the ultimate bridge that allows you to manage, install, configure, and execute BOTH incredible systems from a single, unified console workspace!**
+**OpenClaw-TUI is the ultimate console interface that allows you to manage, install, configure, and execute this incredible system from a single, unified workspace!**
 
 ---
 
@@ -43,13 +38,8 @@ In the software development and retro-gaming worlds, **OpenClaw** has two vastly
   - Guided wizard configuration, onboarding, and API provider setups.
   - Direct background daemon control: Start, Stop, and Restart gateways.
   - Run the interactive chat terminal (`tui`) or launch the web dashboard.
-- 🏴‍☠️ **Captain Claw Game Engine Integration**:
-  - Verify system prerequisites (SDL2, SDL2_image, SDL2_ttf, SDL2_mixer, CMake) across Ubuntu/Debian, macOS (Homebrew), and Windows.
-  - Clone, fetch, and compile the latest Game Engine repository from source.
-  - Check, locate, or copy required asset files like `CLAW.REZ`.
-  - **Interactive XML Config Editor**: Modify game screen resolution, toggle fullscreen mode, and control audio volume without touching manual text documents.
-- 📋 **Unified System Diagnostics**:
-  - Get a single clear health report of your operating system, Node.js state, AI gateway status, and Game Engine directories.
+- 📋 **System Diagnostics**:
+  - Get a clear health report of your operating system, Node.js state, and AI gateway status.
 
 ---
 
@@ -58,6 +48,7 @@ In the software development and retro-gaming worlds, **OpenClaw** has two vastly
 OpenClaw-TUI is entirely self-contained inside Python's robust standard library. It has **zero external python dependencies**, ensuring it runs instantly on any server, container, or computer without installing packages.
 
 - **Python**: 3.8 or newer (3.12+ recommended)
+- **Node.js**: required by the underlying OpenClaw AI gateway (v22.22.3+ recommended)
 - **Git**: Required for cloning source repositories
 
 ---
@@ -88,20 +79,17 @@ Use single-line CLI commands for speed and scripting automation:
 # View help & documentation
 ./openclaw-tui --help
 
-# Check unified system diagnostic report
+# Check diagnostic report
 ./openclaw-tui status
 
-# Install target component (ai / game)
-./openclaw-tui install ai
-./openclaw-tui install game
+# Install OpenClaw AI Assistant
+./openclaw-tui install
 
-# Modify settings for specified component
-./openclaw-tui configure ai
-./openclaw-tui configure game
+# Modify settings for OpenClaw AI Assistant
+./openclaw-tui configure
 
-# Start/Run specified component
-./openclaw-tui run ai
-./openclaw-tui run game
+# Run OpenClaw AI Assistant
+./openclaw-tui run
 ```
 
 ---
@@ -110,33 +98,21 @@ Use single-line CLI commands for speed and scripting automation:
 
 ### Interactive Main Menu
 
-Upon running `./openclaw-tui`, you are greeted by our signature Captain Claw ASCII logo and a main directory choice:
+Upon running `./openclaw-tui`, you are greeted by our signature logo and a clean control panel menu:
 
 ```text
-Welcome to the ultimate OpenClaw TUI Suite! Choose a service to configure/run:
+=== OpenClaw AI Assistant Control Panel ===
 
-  1) 🤖 OpenClaw AI Assistant  (Personal Autonomous Developer Agent)
-  2) 🏴‍☠️ OpenClaw Game Engine  (Captain Claw 1997 HD Reimplementation)
-  3) 📋 Unified Diagnostics  (Combined System Check)
-  4) ℹ️ Learn More          (About the OpenClaw Name Ecosystem)
-  5) ❌ Exit
-```
-
-### Interactive XML Editor (Game Engine)
-
-When configuring the Captain Claw Game Engine, you don't need to manually parse XML nodes. The tool displays your current parameters and lets you modify them through elegant prompts:
-
-```text
-[*] Current Video Resolution: 1024x768
-[*] Fullscreen: false
-[*] Sound Volume: 100 / Music Volume: 100
-
-Select parameters to change:
-1) Edit Resolution (Width & Height)
-2) Toggle Fullscreen Mode
-3) Edit Audio Settings
-4) View config.xml Raw File
-5) Back to main menu
+1) 📥 Install / Download
+2) ⚙️ Configure Onboarding (openclaw onboard)
+3) 🚀 Start Gateway Daemon
+4) 🛑 Stop Gateway Daemon
+5) 🔄 Restart Gateway Daemon
+6) 💬 Launch Local Chat (TUI)
+7) 📊 Open Browser Dashboard
+8) 🩺 Run Doctor Diagnostics
+9) 📋 System Diagnostics (OS & AI Status)
+10) ❌ Exit
 ```
 
 ---
@@ -156,7 +132,7 @@ python3 test_openclaw_tui.py
 2. `test_help_command`: Confirms `--help` displays standard logo, descriptions, and exits with code 0.
 3. `test_status_command`: Confirms `status` command parses environment info and runs non-interactively.
 4. `test_invalid_command`: Ensures unknown commands output to stderr and exit with code 1.
-5. `test_dynamic_import_helpers`: Dynamically compiles and loads helpers directly from the script (even without a `.py` extension) to test internal paths, config builders, and asset locators.
+5. `test_dynamic_import_helpers`: Dynamically compiles and loads helpers directly from the script to test internal paths and methods.
 
 ---
 

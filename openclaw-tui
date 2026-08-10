@@ -2,9 +2,7 @@
 import os
 import sys
 import subprocess
-import shutil
 import json
-import xml.etree.ElementTree as ET
 import platform
 import urllib.request
 
@@ -278,311 +276,11 @@ def run_ai_doctor():
 
 
 # ==========================================
-# OPENCLAW GAME ENGINE FUNCTIONS
-# ==========================================
-
-def get_game_dependencies_status():
-    deps = ["SDL2", "SDL2_image", "SDL2_mixer", "SDL2_ttf", "cmake"]
-    status = {}
-
-    # Simple check based on platform package tools or commands
-    system = platform.system()
-    if system == "Darwin":
-        # Check brew packages
-        for dep in deps:
-            code, _, _ = run_cmd(["brew", "list", dep.lower()], capture_output=True)
-            status[dep] = "Installed" if code == 0 else "Missing"
-    elif system == "Linux":
-        # Check using dpkg or command checks
-        for dep in deps:
-            if dep == "cmake":
-                code, _, _ = run_cmd(["which", "cmake"], capture_output=True)
-                status[dep] = "Installed" if code == 0 else "Missing"
-            else:
-                # We can check library existence or assume missing
-                status[dep] = "Check required via apt/pacman"
-    else:
-        for dep in deps:
-            status[dep] = "Windows (handled via precompiled DLLs)"
-
-    return status
-
-def check_game_assets_present(path="."):
-    """Checks for the presence of the required CLAW.REZ game files."""
-    for root, dirs, files in os.walk(path):
-        for f in files:
-            if f.lower() == "claw.rez":
-                return os.path.join(root, f)
-    return None
-
-def install_openclaw_game():
-    print_header("Setup Captain Claw Game Engine")
-
-    # Step 1: Install system library pre-requisites
-    sys_type = platform.system()
-    print_info(f"System detected: {sys_type}")
-
-    if sys_type == "Darwin":
-        print_info("Ensuring Homebrew dependencies are installed...")
-        get_input("Execute 'brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf cmake'? (y/n)", "y")
-        run_cmd(["brew", "install", "sdl2", "sdl2_image", "sdl2_mixer", "sdl2_ttf", "cmake"])
-    elif sys_type == "Linux":
-        print_info("Please ensure SDL2 and CMake development headers are installed.")
-        print("Example Ubuntu/Debian command:")
-        print("  sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev build-essential cmake")
-        input_apt = get_input("Execute this apt command now? (Requires sudo) (y/n)", "n")
-        if input_apt.lower() == 'y':
-            run_cmd(["sudo", "apt-get", "update"])
-            run_cmd(["sudo", "apt-get", "install", "-y", "libsdl2-dev", "libsdl2-image-dev", "libsdl2-mixer-dev", "libsdl2-ttf-dev", "build-essential", "cmake"])
-
-    # Step 2: Download game engine
-    print_info("Cloning OpenClaw recreation game engine from GitHub...")
-    dest = get_input("Engine Directory path", os.path.expanduser("~/openclaw-game"))
-
-    if not os.path.exists(dest):
-        code, _, _ = run_cmd(["git", "clone", "https://github.com/pjasicek/OpenClaw.git", dest])
-    else:
-        print_warning("Destination folder already exists.")
-        code, _, _ = run_cmd(["git", "pull"], cwd=dest)
-
-    if code == 0:
-        print_success("Successfully checked out OpenClaw source repository!")
-
-        # Build engine
-        build_opt = get_input("Compile the game engine now? (y/n)", "y")
-        if build_opt.lower() == 'y':
-            build_dir = os.path.join(dest, "build")
-            os.makedirs(build_dir, exist_ok=True)
-            print_info("Running CMake...")
-            cmake_code, _, _ = run_cmd(["cmake", ".."], cwd=build_dir)
-            if cmake_code == 0:
-                print_info("Building codebase...")
-                make_code, _, _ = run_cmd(["cmake", "--build", "."], cwd=build_dir)
-                if make_code == 0:
-                    print_success("OpenClaw Game Engine successfully compiled!")
-                else:
-                    print_error("Build execution failed. Make sure all dev toolchains are installed.")
-            else:
-                print_error("CMake generation failed.")
-    else:
-        print_error("Failed to checkout repository.")
-
-    # Step 3: Handle CLAW.REZ
-    print_header("Locate original game assets (CLAW.REZ)")
-    print_info("OpenClaw requires the asset database file CLAW.REZ from the original 1997 Captain Claw.")
-    has_rez = check_game_assets_present(dest)
-    if has_rez:
-        print_success(f"CLAW.REZ already found inside: {has_rez}")
-    else:
-        print_warning("No CLAW.REZ found in the game directory.")
-        source_rez = get_input("Enter the path to your original CLAW.REZ file (or press Enter to skip)", "")
-        if source_rez and os.path.exists(source_rez):
-            shutil.copy(source_rez, dest)
-            print_success("Copied CLAW.REZ successfully!")
-        else:
-            print_info("Note: You must place CLAW.REZ inside the game directory manually before playing.")
-
-    get_input("\nPress ENTER to return to menu")
-    return True
-
-def configure_openclaw_game():
-    print_header("Configure Captain Claw Game Settings")
-    dest = get_input("Path to your OpenClaw game folder", os.path.expanduser("~/openclaw-game"))
-
-    config_file = os.path.join(dest, "config.xml")
-
-    if not os.path.exists(dest):
-        print_error(f"Game folder {dest} does not exist.")
-        get_input("Press ENTER to return")
-        return False
-
-    # Create default config.xml if missing
-    if not os.path.exists(config_file):
-        print_warning("config.xml not found. Generating optimized defaults...")
-        root = ET.Element("Config")
-        video = ET.SubElement(root, "Video")
-        res = ET.SubElement(video, "Resolution")
-        ET.SubElement(res, "Width").text = "1024"
-        ET.SubElement(res, "Height").text = "768"
-        ET.SubElement(video, "Fullscreen").text = "false"
-        ET.SubElement(video, "VSync").text = "true"
-
-        audio = ET.SubElement(root, "Audio")
-        ET.SubElement(audio, "SoundVolume").text = "100"
-        ET.SubElement(audio, "MusicVolume").text = "100"
-
-        tree = ET.ElementTree(root)
-        try:
-            tree.write(config_file, encoding="utf-8", xml_declaration=True)
-            print_success("Created default config.xml!")
-        except Exception as e:
-            print_error(f"Failed to create config.xml: {e}")
-            get_input("Press ENTER to return")
-            return False
-
-    # Read config.xml
-    try:
-        tree = ET.parse(config_file)
-        root = tree.getroot()
-    except Exception as e:
-        print_error(f"Error parsing config.xml: {e}")
-        get_input("Press ENTER to return")
-        return False
-
-    video_node = root.find("Video")
-    if video_node is None:
-        video_node = ET.SubElement(root, "Video")
-
-    res_node = video_node.find("Resolution")
-    if res_node is None:
-        res_node = ET.SubElement(video_node, "Resolution")
-
-    width_node = res_node.find("Width")
-    if width_node is None:
-        width_node = ET.SubElement(res_node, "Width")
-    height_node = res_node.find("Height")
-    if height_node is None:
-        height_node = ET.SubElement(res_node, "Height")
-
-    fullscreen_node = video_node.find("Fullscreen")
-    if fullscreen_node is None:
-        fullscreen_node = ET.SubElement(video_node, "Fullscreen")
-
-    audio_node = root.find("Audio")
-    if audio_node is None:
-        audio_node = ET.SubElement(root, "Audio")
-
-    sound_volume_node = audio_node.find("SoundVolume")
-    if sound_volume_node is None:
-        sound_volume_node = ET.SubElement(audio_node, "SoundVolume")
-    music_volume_node = audio_node.find("MusicVolume")
-    if music_volume_node is None:
-        music_volume_node = ET.SubElement(audio_node, "MusicVolume")
-
-    print_info(f"Current Video Resolution: {width_node.text}x{height_node.text}")
-    print_info(f"Fullscreen: {fullscreen_node.text}")
-    print_info(f"Sound Volume: {sound_volume_node.text} / Music Volume: {music_volume_node.text}")
-
-    print("\nSelect parameters to change:")
-    print("1) Edit Resolution (Width & Height)")
-    print("2) Toggle Fullscreen Mode")
-    print("3) Edit Audio Settings")
-    print("4) View config.xml Raw File")
-    print("5) Back to main menu")
-    choice = get_input("Select action (1-5)", "5")
-
-    if choice == "1":
-        w = get_input("Enter Resolution Width (e.g. 1920, 1024, 800)", width_node.text)
-        h = get_input("Enter Resolution Height (e.g. 1080, 768, 600)", height_node.text)
-        width_node.text = w
-        height_node.text = h
-    elif choice == "2":
-        current_fs = (fullscreen_node.text or "false").lower()
-        new_fs = "false" if current_fs == "true" else "true"
-        fullscreen_node.text = new_fs
-        print_success(f"Fullscreen toggled to: {new_fs}")
-    elif choice == "3":
-        sv = get_input("Enter Sound Volume (0 - 100)", sound_volume_node.text)
-        mv = get_input("Enter Music Volume (0 - 100)", music_volume_node.text)
-        sound_volume_node.text = sv
-        music_volume_node.text = mv
-    elif choice == "4":
-        try:
-            with open(config_file, "r") as f:
-                print(f.read())
-        except Exception as e:
-            print_error(f"Failed to read file: {e}")
-        get_input("Press ENTER to return")
-        return True
-    else:
-        return True
-
-    # Save XML
-    try:
-        # Beautiful indentation helper
-        def indent_tree(elem, level=0):
-            i = "\n" + level*"    "
-            if len(elem):
-                if not elem.text or not elem.text.strip():
-                    elem.text = i + "    "
-                if not elem.tail or not elem.tail.strip():
-                    elem.tail = i
-                for child in elem:
-                    indent_tree(child, level+1)
-                if not child.tail or not child.tail.strip():
-                    child.tail = i
-            else:
-                if level and (not elem.tail or not elem.tail.strip()):
-                    elem.tail = i
-
-        indent_tree(root)
-        tree.write(config_file, encoding="utf-8", xml_declaration=True)
-        print_success("Saved configuration modifications successfully!")
-    except Exception as e:
-        print_error(f"Failed to write config.xml file: {e}")
-
-    get_input("Press ENTER to continue")
-    return True
-
-def run_openclaw_game():
-    print_header("Run Captain Claw Game Engine")
-    dest = get_input("Path to your OpenClaw game folder", os.path.expanduser("~/openclaw-game"))
-
-    if not os.path.exists(dest):
-        print_error(f"Folder {dest} does not exist.")
-        get_input("Press ENTER to return")
-        return False
-
-    rez_path = check_game_assets_present(dest)
-    if not rez_path:
-        print_warning("No CLAW.REZ file detected! The engine will crash without it.")
-        run_anyway = get_input("Do you still want to try running the executable? (y/n)", "n")
-        if run_anyway.lower() != 'y':
-            return False
-
-    # Find executable
-    binaries = []
-    for root, dirs, files in os.walk(dest):
-        for f in files:
-            if f in ["openclaw", "OpenClaw.exe", "OpenClaw"]:
-                # Check executable permissions on Unix
-                full_path = os.path.join(root, f)
-                if os.name != 'nt' and not os.access(full_path, os.X_OK):
-                    continue
-                binaries.append(full_path)
-
-    if not binaries:
-        print_error("No executable binaries found. Did you build the engine or download a package release?")
-        get_input("Press ENTER to return")
-        return False
-
-    print_info("Found binaries:")
-    for i, b in enumerate(binaries):
-        print(f"{i+1}) {b}")
-    idx = int(get_input("Select binary to execute (1-{})".format(len(binaries)), "1")) - 1
-
-    if 0 <= idx < len(binaries):
-        target_bin = binaries[idx]
-        print_info(f"Launching {target_bin}...")
-
-        # Execute binary securely using list format
-        code, _, _ = run_cmd([target_bin], cwd=dest)
-        if code == 0:
-            print_success("Game engine finished successfully!")
-        else:
-            print_warning(f"Game engine exited with code: {code}")
-    else:
-        print_error("Invalid selection.")
-
-    get_input("Press ENTER to return")
-
-
-# ==========================================
 # DIAGNOSTICS & SYSTEM STATUS
 # ==========================================
 
 def display_unified_status(interactive=True):
-    print_header("Unified OpenClaw System Diagnostics")
+    print_header("OpenClaw System Diagnostics")
 
     # 1. OS & Platform Details
     print(f"{BOLD}System Information:{RESET}")
@@ -606,17 +304,6 @@ def display_unified_status(interactive=True):
     if extra:
         print(f"    ↳ Info: {extra}")
 
-    # 4. OpenClaw Game Engine Status
-    game_path = os.path.expanduser("~/openclaw-game")
-    game_exists = os.path.exists(game_path)
-    game_disp = f"{GREEN}Installed at {game_path}{RESET}" if game_exists else f"{RED}Not Found (Default: ~/openclaw-game){RESET}"
-    print(f"  Game Engine:   {game_disp}")
-
-    if game_exists:
-        rez_found = check_game_assets_present(game_path)
-        rez_disp = f"{GREEN}Found ({rez_found}){RESET}" if rez_found else f"{RED}Missing CLAW.REZ{RESET}"
-        print(f"    ↳ Assets:    {rez_disp}")
-
     if interactive:
         get_input("\nPress ENTER to return to menu")
 
@@ -635,16 +322,16 @@ def print_help():
   {CYAN}openclaw-tui{RESET}
 
 {BOLD}Non-Interactive Commands:{RESET}
-  {GREEN}status{RESET}                 Show diagnostic status of both OpenClaw AI and Captain Claw.
-  {GREEN}install [ai|game]{RESET}      Install specified components.
-  {GREEN}configure [ai|game]{RESET}    Configure settings for specified components.
-  {GREEN}run [ai|game]{RESET}          Execute or start specified components.
+  {GREEN}status{RESET}                 Show diagnostic status of OpenClaw AI.
+  {GREEN}install{RESET}                Install OpenClaw AI Assistant.
+  {GREEN}configure{RESET}              Configure settings for OpenClaw AI Assistant.
+  {GREEN}run{RESET}                    Execute or start OpenClaw AI Assistant.
   {GREEN}help, -h, --help{RESET}       Show this detailed documentation.
 
 {BOLD}Examples:{RESET}
   openclaw-tui status
-  openclaw-tui install ai
-  openclaw-tui run game
+  openclaw-tui install
+  openclaw-tui run
 """)
 
 def run_cli_mode():
@@ -660,32 +347,26 @@ def run_cli_mode():
 
     elif cmd == "install":
         target = sys.argv[2].lower() if len(sys.argv) > 2 else ""
-        if target == "ai":
+        if target in ["", "ai"]:
             install_openclaw_ai()
-        elif target == "game":
-            install_openclaw_game()
         else:
-            print_error("Please specify target: 'openclaw-tui install ai' or 'openclaw-tui install game'")
+            print_error(f"Unknown target '{target}' for install command.")
             sys.exit(1)
 
     elif cmd == "configure":
         target = sys.argv[2].lower() if len(sys.argv) > 2 else ""
-        if target == "ai":
+        if target in ["", "ai"]:
             configure_openclaw_ai()
-        elif target == "game":
-            configure_openclaw_game()
         else:
-            print_error("Please specify target: 'openclaw-tui configure ai' or 'openclaw-tui configure game'")
+            print_error(f"Unknown target '{target}' for configure command.")
             sys.exit(1)
 
     elif cmd == "run":
         target = sys.argv[2].lower() if len(sys.argv) > 2 else ""
-        if target == "ai":
+        if target in ["", "ai"]:
             launch_ai_chat()
-        elif target == "game":
-            run_openclaw_game()
         else:
-            print_error("Please specify target: 'openclaw-tui run ai' or 'openclaw-tui run game'")
+            print_error(f"Unknown target '{target}' for run command.")
             sys.exit(1)
 
     else:
@@ -702,99 +383,39 @@ def run_interactive_mode():
         clear_screen()
         show_logo()
 
-        print(f"Welcome to the ultimate {BOLD}OpenClaw TUI Suite{RESET}! Choose a service to configure/run:\n")
-        print(f"  {BOLD}1) 🤖 OpenClaw AI Assistant{RESET}  (Personal Autonomous Developer Agent)")
-        print(f"  {BOLD}2) 🏴‍☠️ OpenClaw Game Engine{RESET}  (Captain Claw 1997 HD Reimplementation)")
-        print(f"  {BOLD}3) 📋 Unified Diagnostics{RESET}  (Combined System Check)")
-        print(f"  {BOLD}4) ℹ️ Learn More{RESET}          (About the OpenClaw Name Ecosystem)")
-        print(f"  {BOLD}5) ❌ Exit{RESET}\n")
+        print_header("OpenClaw AI Assistant Control Panel")
+        print("1) 📥 Install / Download")
+        print("2) ⚙️ Configure Onboarding (openclaw onboard)")
+        print("3) 🚀 Start Gateway Daemon")
+        print("4) 🛑 Stop Gateway Daemon")
+        print("5) 🔄 Restart Gateway Daemon")
+        print("6) 💬 Launch Local Chat (TUI)")
+        print("7) 📊 Open Browser Dashboard")
+        print("8) 🩺 Run Doctor Diagnostics")
+        print("9) 📋 System Diagnostics (OS & AI Status)")
+        print("10) ❌ Exit\n")
 
-        choice = get_input("Enter choice (1-5)", "5")
+        choice = get_input("Enter choice (1-10)", "10")
 
         if choice == "1":
-            while True:
-                clear_screen()
-                show_logo()
-                print_header("OpenClaw AI Assistant Control Panel")
-                print("1) 📥 Install / Download")
-                print("2) ⚙️ Configure Onboarding (openclaw onboard)")
-                print("3) 🚀 Start Gateway Daemon")
-                print("4) 🛑 Stop Gateway Daemon")
-                print("5) 🔄 Restart Gateway Daemon")
-                print("6) 💬 Launch Local Chat (TUI)")
-                print("7) 📊 Open Browser Dashboard")
-                print("8) 🩺 Run Doctor Diagnostics")
-                print("9) ⬅️ Back to Main Menu")
-
-                sub_choice = get_input("Select action (1-9)", "9")
-
-                if sub_choice == "1":
-                    install_openclaw_ai()
-                elif sub_choice == "2":
-                    configure_openclaw_ai()
-                elif sub_choice == "3":
-                    run_openclaw_ai_daemon("start")
-                elif sub_choice == "4":
-                    run_openclaw_ai_daemon("stop")
-                elif sub_choice == "5":
-                    run_openclaw_ai_daemon("restart")
-                elif sub_choice == "6":
-                    launch_ai_chat()
-                elif sub_choice == "7":
-                    launch_ai_dashboard()
-                elif sub_choice == "8":
-                    run_ai_doctor()
-                elif sub_choice == "9":
-                    break
-
+            install_openclaw_ai()
         elif choice == "2":
-            while True:
-                clear_screen()
-                show_logo()
-                print_header("OpenClaw Captain Claw Game Engine Panel")
-                print("1) 📥 Install Game Engine & Dependencies")
-                print("2) ⚙️ Configure Screen & Audio Settings")
-                print("3) 🚀 Launch Captain Claw!")
-                print("4) ⬅️ Back to Main Menu")
-
-                sub_choice = get_input("Select action (1-4)", "4")
-
-                if sub_choice == "1":
-                    install_openclaw_game()
-                elif sub_choice == "2":
-                    configure_openclaw_game()
-                elif sub_choice == "3":
-                    run_openclaw_game()
-                elif sub_choice == "4":
-                    break
-
+            configure_openclaw_ai()
         elif choice == "3":
-            display_unified_status(interactive=True)
-
+            run_openclaw_ai_daemon("start")
         elif choice == "4":
-            clear_screen()
-            show_logo()
-            print_header("About the OpenClaw Ecosystem")
-            print(f"""{BOLD}The Name Collision Mystery:{RESET}
-In 2026, the name "OpenClaw" gained massive fame in two completely different realms:
-
-1. {BOLD}The AI Assistant ({GREEN}openclaw/openclaw{RESET}):{RESET}
-   An extremely popular, fully autonomous, local-first personal developer AI agent
-   boasting hundreds of thousands of GitHub stars. It operates on your machine,
-   interacting through popular chat applications, executing terminals, running code,
-   and managing tasks.
-
-2. {BOLD}The Game Engine preservation ({RED}pjasicek/OpenClaw{RESET}):{RESET}
-   An elegant open-source C++ and SDL2 recreation of Monolith's beloved 1997
-   2D side-scrolling platformer, "Captain Claw" (with its legendary pirate cat Nathaniel J. Claw).
-   It allows retro gamers to run the game flawlessly on modern HD operating systems.
-
-{CYAN}This TUI (Terminal User Interface) tool bridges the gap, allowing you to run, configure,
-and install BOTH magnificent pieces of technology from a single console wrapper!{RESET}
-""")
-            get_input("Press ENTER to return to main menu")
-
-        elif choice == "5" or choice is None:
+            run_openclaw_ai_daemon("stop")
+        elif choice == "5":
+            run_openclaw_ai_daemon("restart")
+        elif choice == "6":
+            launch_ai_chat()
+        elif choice == "7":
+            launch_ai_dashboard()
+        elif choice == "8":
+            run_ai_doctor()
+        elif choice == "9":
+            display_unified_status(interactive=True)
+        elif choice == "10" or choice is None:
             print_success("Thanks for using OpenClaw TUI! Goodbye.")
             sys.exit(0)
 
