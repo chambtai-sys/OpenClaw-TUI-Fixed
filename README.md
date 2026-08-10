@@ -1,4 +1,4 @@
-# OpenClaw-TUI
+# OpenClaw-TUI-Fixed
 
 ```text
  ██████╗ ██████╗ ███████╗███╗   ██╗ ██████╗██╗      █████╗ ██╗█╗  ██╗
@@ -15,7 +15,7 @@
                                TUI Tool v1.0.0
 ```
 
-An advanced, interactive **TUI (Terminal User Interface)** and unified **CLI (Command Line Interface)** for running, configuring, installing, and diagnosing the **OpenClaw AI Assistant** ecosystem.
+An advanced, interactive and fixed **TUI (Terminal User Interface)** and unified **CLI (Command Line Interface)** for running, configuring, installing, and diagnosing the **OpenClaw AI Assistant** ecosystem.
 
 ---
 
